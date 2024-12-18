@@ -22,13 +22,32 @@ a:hover {
   color: #535bf2;
 }
 
-body {
+body{
   margin: 0;
+  padding:0;
+}
+
+.main__container {
   display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
-background-color: #121212;
+  flex-direction: column;
+  justify-content: center; 
+  align-items: center;     
+  height: 100vh;           
+  width: 100%;     
+  overflow: hidden;        
+}
+
+
+.startScreen__container{
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.button__container{
+display:flex ;
 }
 
 h1 {
@@ -59,12 +78,7 @@ button:focus-visible {
   padding: 2em;
 }
 
-#app {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
-}
+
 
 @media (prefers-color-scheme: light) {
   :root {
@@ -77,4 +91,23 @@ button:focus-visible {
   button {
     background-color: #f9f9f9;
   }
+}
+
+.hi-hat-container {
+  position: relative;
+  display: inline-block;
+}
+
+.hi-hat-modes {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background-color: white;
+  border: 1px solid #ddd;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.hi-hat-container:hover .hi-hat-modes {
+  display: block;
 }
