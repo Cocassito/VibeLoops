@@ -99,7 +99,7 @@ function setupAutoRestart() {
     if (!isKicking && hasUserInteracted) {
       playKick(1)
     }
-  }, 4000) 
+  }, 1) 
 }
 
 function render(timestamp: number) {

@@ -1,11 +1,10 @@
 <script setup lang="ts">
-import Cloud from './components/Cloud.vue';
+import ToneExperiment from './components/ToneExperiment.vue';
 
 </script>
-
 <template>
  
-  <Cloud />
+  <ToneExperiment />
 </template>
 
 <style scoped>
