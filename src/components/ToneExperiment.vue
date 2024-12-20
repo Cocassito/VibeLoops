@@ -8,12 +8,12 @@ const HEIGHT = 500
 const panel = ref<HTMLDListElement | null>(null)
 const canvas = ref<HTMLCanvasElement | null>(null)
 const context = ref<CanvasRenderingContext2D | null>(null)
-const showStartScreen = ref(true); // État de l'écran intermédiaire
+const showStartScreen = ref(true);
 
 function startFromScreen() {
     showStartScreen.value = false;
     if (context.value && canvas.value) {
-        context.value = canvas.value.getContext('2d'); // Récupère le contexte
+        context.value = canvas.value.getContext('2d');
     }
     requestAnimationFrame(render);
     play();
@@ -32,28 +32,43 @@ onUnmounted(() => {
     if (kickPlayer) kickPlayer.dispose()
 })
 
-const colorDefault = 'blue';
+
+
+const colorDefault = '#000000';
 const defaultCircles = [] as { radius: number, color: string }[];
 
 const numCircles = 5;
 const centerX = WIDTH / 2;
 const centerY = HEIGHT / 2;
 
-const circle = [] as { x: number, y: number, radius: number, velocity: number, color: string, shake: number }[];
+const circle = [] as {
+    x: number;
+    y: number;
+    radius: number;
+    velocity: number;
+    color: string;
+    shake: number;
+    lineWidth: number;
+}[];
 
 for (let i = 0; i < numCircles; i++) {
-    const radius = i * 10 + 50;
+    const radius = i * 40 + 50;
     const velocity = i + 5 / 2.2;
     const color = colorDefault;
 
-    // Ajouter chaque cercle à la liste de cercles
-    circle.push({ x: centerX, y: centerY, radius, velocity, color, shake: 0 });
+    circle.push({
+        x: centerX,
+        y: centerY,
+        radius,
+        velocity,
+        color,
+        shake: 0,
+        lineWidth: 2,
+    });
 
-    // Sauvegarder l'état par défaut dans `defaultCircles`
     defaultCircles.push({ radius, color });
 }
 
-// Fonction pour obtenir un point sur un cercle à un certain angle
 type Point = { x: number; y: number };
 function getPointAtAngle(center: Point, angle: number, distance: number): Point {
     return {
@@ -62,46 +77,137 @@ function getPointAtAngle(center: Point, angle: number, distance: number): Point 
     };
 }
 
-// Réinitialiser un cercle à son état par défaut
-function resetCircleState(circleIndex: number) {
-    const currentCircle = circle[circleIndex];
-    currentCircle.radius = defaultCircles[circleIndex].radius;
-    currentCircle.color = defaultCircles[circleIndex].color;
+function updateVoiceAllCircle() {
+    circle.forEach(element => {
+        element.radius += 4;
+    });
 }
 
-// Mettre à jour un cercle lorsqu'un kick est joué
-function updateCircleOnKick(circleIndex: number) {
-    const currentCircle = circle[circleIndex];
-    currentCircle.radius += 5;  // Augmenter le rayon
-    currentCircle.color = 'red';  // Changer la couleur en rouge
+function resetVoiceAllCircle() {
+    circle.forEach((element, index) => {
+        element.radius = defaultCircles[index].radius;
+    });
 }
+
+function resetMelodyState() {
+    const melodyCircle = circle[0]
+    melodyCircle.color = defaultCircles[1].color;
+    melodyCircle.lineWidth = 2;
+
+
+}
+function updateCircleMelody() {
+    const melodyCircle = circle[0]
+    melodyCircle.color = '#8E7DEF';
+    melodyCircle.lineWidth = 8;
+
+}
+
+function resetKickCircleState() {
+    const kickCircle = circle[2];
+    kickCircle.radius = defaultCircles[2].radius;
+    kickCircle.color = defaultCircles[2].color;
+    kickCircle.lineWidth = 2;
+}
+
+
+function updateCircleOnKick() {
+    const kickCircle = circle[2];
+    kickCircle.radius += 15;
+    kickCircle.color = '#ff32ff';
+    kickCircle.lineWidth = 8;
+}
+
+function resetCircleHihat() {
+    const hihatCircle = circle[1];
+    hihatCircle.color = defaultCircles[1].color;
+    hihatCircle.lineWidth = 2;
+}
+
+
+function updateCircleHihat() {
+    const hihatCircle = circle[1];
+    hihatCircle.color = '#f00020';
+    hihatCircle.lineWidth = 8;
+}
+
 
 let bassShakeTime = 0;
+let bassShakeStart = 0;
+let foleyShakeTime = 0;
+let foleyShakeStart = 0;
 
+function updateBassShake(timestamp: number, bassCircle: { x: number, y: number, shake: number }) {
+    if (bassShakeTime > 0) {
+        const elapsed = timestamp - bassShakeStart;
+
+        if (elapsed < bassShakeTime) {
+            bassCircle.x = centerX + Math.sin(elapsed / 40) * 10;
+            bassCircle.y = centerY + Math.cos(elapsed / 20) * 10;
+        } else {
+            resetBassCircleState();
+            bassShakeTime = 0;
+        }
+    }
+}
+
+function updateFoleyShake(timestamp: number, foleyCircle: { x: number, y: number, shake: number }) {
+    if (foleyShakeTime > 0) {
+        const elapsed = timestamp - foleyShakeStart;
+
+        if (elapsed < foleyShakeTime) {
+            foleyCircle.x = centerX + Math.sin(elapsed / 40) * 10;
+            foleyCircle.y = centerY + Math.cos(elapsed / 20) * 10;
+        } else {
+            resetCircleFoley();
+            foleyShakeTime = 0;
+        }
+    }
+}
 
 function resetBassCircleState() {
-    const bassCircle = circle[1];  // Utiliser le cercle à l'index 1
+    const bassCircle = circle[4];
     bassCircle.x = centerX;
     bassCircle.y = centerY;
     bassCircle.shake = 0;
+    bassCircle.lineWidth = 2;
+    bassCircle.color = defaultCircles[4].color;
 }
 
 function updateCircleOnBass() {
-    const bassCircle = circle[1];  // Utiliser le cercle à l'index 1
-    bassCircle.shake = 5;  // Créer un tremblement (un effet de vibration)
-    // Déplacer légèrement sur les axes X et Y pour simuler le tremblement
-    bassCircle.x += (Math.random() - 0.5) * 10;  // Déplacer légèrement sur l'axe X
-    bassCircle.y += (Math.random() - 0.5) * 10;  // Déplacer légèrement sur l'axe Y
+    const bassCircle = circle[4];
+    bassCircle.color = '#2ceaff';
+    bassCircle.lineWidth = 8;
+    bassShakeTime = 800;
+    bassShakeStart = performance.now();
 }
 
+function resetCircleFoley() {
+    const foleyCircle = circle[3];
+    foleyCircle.color = defaultCircles[3].color;
+    foleyCircle.x = centerX;
+    foleyCircle.y = centerY;
+    foleyCircle.shake = 0;
+    foleyCircle.lineWidth = 2;
+}
+
+function updateCircleFoley() {
+    const foleyCircle = circle[3];
+    foleyCircle.color = '#00f048';
+    foleyCircle.lineWidth = 8;
+    foleyShakeTime = 500;
+    foleyShakeStart = performance.now();
+}
 
 let playKick = ref(false)
 let playBass = ref(false)
 let playHiHat = ref(false)
 let playMelody = ref(false)
+let playVoice = ref(false)
+let playFoley = ref(false)
 let isPlaying = ref(false)
 let currentLoop: Tone.Loop | null = null;
-let isHiHatHovered = ref(false);  // Suivi du survol du bouton Hi-Hat
+let isHiHatHovered = ref(false);
 let hiHatMode = ref<'4' | '2'>('4')
 
 const transport = Tone.getTransport();
@@ -110,28 +216,40 @@ const bassGain = new Tone.Gain(1.2).toDestination();
 transport.bpm.value = 83;
 
 const kickPlayer = new Tone.Player({ url: '/src/assets/sound/kick/kick.wav' }).toDestination();
-const bassPlayer = new Tone.Player({ url: '/src/assets/sound/bass/bass.wav' }).connect(bassGain);
+const bassPlayer = new Tone.Player({ url: '/src/assets/sound/bass/bass2.wav' }).connect(bassGain);
 const hiHatClosed = new Tone.Player({ url: '/src/assets/sound/hihat/hihat2.wav' }).toDestination();
 const melody1 = new Tone.Player({ url: '/src/assets/sound/melody/melody83.wav', loop: true }).toDestination();
+const voice = new Tone.Player({ url: '/src/assets/sound/vocal/BringItOn.wav' }).toDestination();
+const foleyPlayer = new Tone.Player({ url: '/src/assets/sound/foley/foley.wav' }).toDestination();
 
 
-
+//FONCTION POUR TOUT STOP
 function stopAllSounds() {
     playKick.value = false;
     playBass.value = false;
+    playFoley.value = false;
     playHiHat.value = false;
     playMelody.value = false;
+
+
+    resetBassCircleState();
+    resetCircleHihat();
+    resetKickCircleState();
+    resetMelodyState();
+    resetVoiceAllCircle();
+    resetCircleFoley();
 
     if (kickPlayer.state === 'started') kickPlayer.stop();
     if (bassPlayer.state === 'started') bassPlayer.stop();
     if (hiHatClosed.state === 'started') hiHatClosed.stop();
     if (melody1.state === 'started') melody1.stop();
+    if (foleyPlayer.state === 'started') foleyPlayer.stop();
 
     console.log("Tous les sons ont été arrêtés !");
 }
 
 function isAnySoundActive() {
-    return playKick.value || playBass.value || playHiHat.value || playMelody.value;
+    return playKick.value || playBass.value || playHiHat.value || playMelody.value || playFoley.value;
 }
 
 //FONCTION POUR LES BOUTONS
@@ -149,15 +267,35 @@ function onHiHatLeave() {
 
 function toggleHiHat() { playHiHat.value = !playHiHat.value; }
 function toggleKick() { playKick.value = !playKick.value; }
+function toggleFoley() { playFoley.value = !playFoley.value; }
 function toggleBass() { playBass.value = !playBass.value; }
 function toggleMelody() {
     playMelody.value = !playMelody.value;
     if (playMelody.value) {
         melody1.start();
+        updateCircleMelody()
     } else {
+        resetMelodyState()
         melody1.stop();
     }
 }
+function toggleVoice() {
+    playVoice.value = !playVoice.value;
+
+    if (playVoice.value) {
+        voice.start();
+        updateVoiceAllCircle();
+
+        voice.onstop = () => {
+            playVoice.value = false;
+            resetVoiceAllCircle();
+        };
+    } else {
+        voice.stop();
+        resetVoiceAllCircle();
+    }
+}
+
 
 
 function play() {
@@ -165,69 +303,85 @@ function play() {
         console.log("La boucle est déjà en cours !");
         return;
     }
-
     isPlaying.value = true;
     let i = 0;
-
     currentLoop = new Tone.Loop((time) => {
-    if (playKick.value && i % 8 === 0) {
-        kickPlayer.start(time);
-        updateCircleOnKick(0); // Modifier le cercle du kick
-    } else {
-        resetCircleState(0); // Réinitialiser le cercle du kick
-    }
-
-    if (playBass.value && i % 4 === 0) {
-        bassPlayer.start(time);
-        updateCircleOnBass(); // Appliquer le tremblement pour le cercle de basse
-    } else {
-        resetBassCircleState(); // Réinitialiser le cercle de basse
-    }
-
-    if (playHiHat.value) {
-        if (hiHatMode.value === '4' && i % 4 === 0) {
-            hiHatClosed.start(time);
-        } else if (hiHatMode.value === '2' && i % 2 === 0) {
-            hiHatClosed.start(time);
+        if (playKick.value && i % 2 === 0) {
+            kickPlayer.start(time);
+            updateCircleOnKick();
+        } else {
+            resetKickCircleState();
         }
-    }
-    i++;
-}, "4n");
 
+        if (playBass.value && i % 4 === 0) {
+            bassPlayer.start(time);
+            updateCircleOnBass();
+        } else {
+            resetBassCircleState();
+        }
 
-    if (playMelody.value) {
-        melody1.start();
-    }
+        if (playFoley.value && i % 8 === 0) {
+            foleyPlayer.start(time);
+            updateCircleFoley();
+        } else {
+            resetCircleFoley();
+        }
 
+        if (playHiHat.value) {
+            let triggered = false;
+
+            if (hiHatMode.value === '4' && i % 4 === 0) {
+                hiHatClosed.start(time);
+                updateCircleHihat();
+                triggered = true;
+            } else if (hiHatMode.value === '2' && i % 2 === 0) {
+                hiHatClosed.start(time);
+                updateCircleHihat();
+                triggered = true;
+            }
+
+            if (!triggered) {
+                resetCircleHihat();
+            }
+        }
+        i++;
+    }, "4n");
     currentLoop.start(0);
     transport.start();
     console.log("Le beat démarre !");
 }
 
-// Fonction de rendu pour afficher les cercles sur le canvas
 function render(timestamp: number) {
     if (!context.value) return;
 
     const ctx = context.value;
     ctx.clearRect(0, 0, WIDTH, HEIGHT);
 
-    // Dessiner les cercles normalement
-    circle.forEach(c => {
+    circle.forEach((c, index) => {
+        let offsetX = 0;
+        let offsetY = 0;
+
+        if (index === 4) {
+            updateBassShake(timestamp, c);
+        }
+
+        if (index === 3) {
+            updateFoleyShake(timestamp, c);
+        }
+
         const angle1 = getPointAtAngle({ x: 500, y: 500 }, timestamp / 100000 * c.velocity, 100).x % (Math.PI * 2);
+
         ctx.beginPath();
-        ctx.arc(c.x, c.y, c.radius, angle1 - Math.PI, angle1);
+        ctx.arc(c.x + offsetX, c.y + offsetY, c.radius, angle1 - Math.PI, angle1);
         ctx.strokeStyle = c.color;
-        ctx.lineWidth = 2;
+        ctx.lineWidth = c.lineWidth;
         ctx.stroke();
     });
 
-    // Appliquer l'effet de tremblement sur le cercle de basse
-    if (circle[1].shake > 0) {
-        circle[1].shake -= (Date.now() - bassShakeTime) / 1000;
-    }
-
     requestAnimationFrame(render);
 }
+
+
 
 </script>
 
@@ -243,10 +397,10 @@ function render(timestamp: number) {
                 <canvas :width="WIDTH" :height="HEIGHT" ref="canvas"></canvas>
             </div>
             <div class="button__container">
+                <button @click="toggleMelody">{{ playMelody ? 'Melody: On' : 'Melody: Off' }}</button>
                 <button @click="toggleKick">{{ playKick ? 'Kick: On' : 'Kick: Off' }}</button>
                 <button @click="toggleBass">{{ playBass ? 'Bass: On' : 'Bass: Off' }}</button>
 
-                <!-- Bouton Hi-Hat avec gestion de survol pour afficher les modes -->
                 <div class="hi-hat-container" @mouseover="onHiHatHover" @mouseleave="onHiHatLeave">
                     <button @click="toggleHiHat">{{ playHiHat ? 'Hi-Hat: On' : 'Hi-Hat: Off' }}</button>
                     <div class="hi-hat-modes" v-if="isHiHatHovered">
@@ -254,8 +408,9 @@ function render(timestamp: number) {
                         <button @click="toggleHiHatMode('2')">Mode 2 temps</button>
                     </div>
                 </div>
+                <button @click="toggleVoice">{{ playVoice ? 'Voice: On' : 'Voice: Off' }}</button>
+                <button @click="toggleFoley">{{ playFoley ? 'Foley: On' : 'Foley: Off' }}</button>
 
-                <button @click="toggleMelody">{{ playMelody ? 'Melody: On' : 'Melody: Off' }}</button>
                 <button @click="stopAllSounds" :disabled="!isAnySoundActive()">Stop All Sounds</button>
             </div>
         </div>

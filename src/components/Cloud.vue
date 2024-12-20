@@ -24,10 +24,9 @@ for (let i = 0; i < numCircles; i++) {
   circle.push({ x: centerX, y: centerY, radius, velocity, color })
 }
 
-// Configuration Tone.js
 let kickPlayer: Tone.Player
 let isKicking = false
-let hasUserInteracted = false // Flag pour suivre l'interaction utilisateur
+let hasUserInteracted = false 
 
 onMounted(async () => {
   if (!canvas.value) return
@@ -37,7 +36,6 @@ onMounted(async () => {
   context.value.font = '10px monospace'
   requestAnimationFrame(render)
 
-  // Charger le kick sound avec Tone.js (autostart désactivé)
   kickPlayer = new Tone.Player({
     url: '/src/assets/sound/kick/WAAWF_Kick3_Rev.mp3',
     onload: () => console.log('Kick loaded!'),
@@ -61,7 +59,6 @@ function getPointAtAngle(center: Point, angle: number, distance: number): Point 
 
 function kick() {
   if (!hasUserInteracted) {
-    // Nécessaire pour démarrer le contexte audio Tone.js après une interaction
     Tone.start()
     hasUserInteracted = true
   }
@@ -81,7 +78,6 @@ function playKick(index: number) {
     isKicking = true
   })
 
-  // Définir un comportement pour la fin du son
   kickPlayer.onstop = () => {
     stopKick(index)
     setupAutoRestart()
