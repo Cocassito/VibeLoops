@@ -19,6 +19,8 @@ function startFromScreen() {
     play();
 }
 onMounted(async () => {
+    await Tone.loaded(); 
+
     if (!canvas.value) return
     context.value = canvas.value!.getContext('2d')
     if (!context.value) return
@@ -215,10 +217,10 @@ const bassGain = new Tone.Gain(1.2).toDestination();
 
 transport.bpm.value = 83;
 
+const melody1 = new Tone.Player({ url: '/assets/sound/melody/melody83.wav', loop: true }).toDestination();
 const kickPlayer = new Tone.Player({ url: '/assets/sound/kick/kick.wav' }).toDestination();
 const bassPlayer = new Tone.Player({ url: '/assets/sound/bass/bass2.wav' }).connect(bassGain);
 const hiHatClosed = new Tone.Player({ url: '/assets/sound/hihat/hihat2.wav' }).toDestination();
-const melody1 = new Tone.Player({ url: '/assets/sound/melody/melody83.wav', loop: true }).toDestination();
 const voice = new Tone.Player({ url: '/assets/sound/vocal/BringItOn.wav' }).toDestination();
 const foleyPlayer = new Tone.Player({ url: '/assets/sound/foley/foley.wav' }).toDestination();
 
