@@ -271,14 +271,20 @@ function toggleFoley() { playFoley.value = !playFoley.value; }
 function toggleBass() { playBass.value = !playBass.value; }
 function toggleMelody() {
     playMelody.value = !playMelody.value;
+    
     if (playMelody.value) {
-        melody1.start();
-        updateCircleMelody()
+        if (melody1.buffer) { // Vérifie que le buffer est chargé avant de jouer
+            melody1.start();
+            updateCircleMelody();
+        } else {
+            console.error("Melody buffer is not loaded!");
+        }
     } else {
-        resetMelodyState()
+        resetMelodyState();
         melody1.stop();
     }
 }
+
 function toggleVoice() {
     playVoice.value = !playVoice.value;
 
