@@ -215,12 +215,12 @@ const bassGain = new Tone.Gain(1.2).toDestination();
 
 transport.bpm.value = 83;
 
-const kickPlayer = new Tone.Player({ url: '/public/assets/sound/kick/kick.wav' }).toDestination();
-const bassPlayer = new Tone.Player({ url: '/public/assets/sound/bass/bass2.wav' }).connect(bassGain);
-const hiHatClosed = new Tone.Player({ url: '/public/assets/sound/hihat/hihat2.wav' }).toDestination();
-const melody1 = new Tone.Player({ url: '/public/assets/sound/melody/melody83.wav', loop: true }).toDestination();
-const voice = new Tone.Player({ url: '/public/assets/sound/vocal/BringItOn.wav' }).toDestination();
-const foleyPlayer = new Tone.Player({ url: '/public/assets/sound/foley/foley.wav' }).toDestination();
+const kickPlayer = new Tone.Player({ url: '/assets/sound/kick/kick.wav' }).toDestination();
+const bassPlayer = new Tone.Player({ url: '/assets/sound/bass/bass2.wav' }).connect(bassGain);
+const hiHatClosed = new Tone.Player({ url: '/assets/sound/hihat/hihat2.wav' }).toDestination();
+const melody1 = new Tone.Player({ url: '/assets/sound/melody/melody83.wav', loop: true }).toDestination();
+const voice = new Tone.Player({ url: '/assets/sound/vocal/BringItOn.wav' }).toDestination();
+const foleyPlayer = new Tone.Player({ url: '/assets/sound/foley/foley.wav' }).toDestination();
 
 
 //FONCTION POUR TOUT STOP
