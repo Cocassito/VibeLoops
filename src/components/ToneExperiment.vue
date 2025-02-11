@@ -334,7 +334,7 @@ function play() {
                 hiHatClosed.start(time);
                 updateCircleHihat();
                 triggered = true;
-            } else if (hiHatMode.value === '2' && i % 2 === 0) {
+            } else if (hiHatMode.value === '2' && i % 2 !== 0) {
                 hiHatClosed.start(time);
                 updateCircleHihat();
                 triggered = true;
